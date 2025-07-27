@@ -55,7 +55,6 @@ if is_sourced; then
     }
 else
     echo "This script should be sourced, not executed directly."
-    exit 1
 fi
 
 # Get the absolute path of the project's root directory (where this script is located).

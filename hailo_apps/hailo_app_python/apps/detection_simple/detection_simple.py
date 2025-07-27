@@ -1,18 +1,16 @@
-import os
-import sys
-from pathlib import Path
+# region imports
+# Standard library imports
+
+# Third-party imports
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
+
+# Local application-specific imports
 import hailo
-
-# Add the local hailo_apps directory to Python path
-project_root = Path(__file__).resolve().parent.parent
-local_hailo_apps_path = project_root / 'hailo_apps'
-sys.path.insert(0, str(local_hailo_apps_path))
-
 from hailo_apps.hailo_app_python.core.gstreamer.gstreamer_app import app_callback_class
-from hailo_apps.hailo_app_python.apps.detection_file_simple.detection_pipeline_simple import GStreamerDetectionAppFile
+from hailo_apps.hailo_app_python.apps.detection_simple.detection_pipeline_simple import GStreamerDetectionApp
+# endregion imports
 
 # User-defined class to be used in the callback function: Inheritance from the app_callback_class
 class user_app_callback_class(app_callback_class):
@@ -32,10 +30,6 @@ def app_callback(pad, info, user_data):
     return Gst.PadProbeReturn.OK
 
 if __name__ == "__main__":
-    project_root = Path(__file__).resolve().parent.parent
-    env_file     = project_root / ".env"
-    env_path_str = str(env_file)
-    os.environ["HAILO_ENV_FILE"] = env_path_str
     user_data = user_app_callback_class()  # Create an instance of the user app callback class
-    app = GStreamerDetectionAppFile(app_callback, user_data)
+    app = GStreamerDetectionApp(app_callback, user_data)
     app.run()
