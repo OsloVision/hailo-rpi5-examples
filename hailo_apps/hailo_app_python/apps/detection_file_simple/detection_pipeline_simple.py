@@ -23,6 +23,7 @@ from hailo_apps.hailo_app_python.core.gstreamer.gstreamer_helper_pipelines impor
     INFERENCE_PIPELINE,
     USER_CALLBACK_PIPELINE,
     FILE_SINK_PIPELINE,
+    OVERLAY_PIPELINE,  # Add this import
 )
 from hailo_apps.hailo_app_python.core.gstreamer.gstreamer_app import (
     GStreamerApp,
@@ -48,7 +49,7 @@ class GStreamerDetectionAppFile(GStreamerApp):
         )
         parser.add_argument(
             "--output-file",
-            default="detection_output.mp4",
+            default="detection_output.mkv",
             help="Path to output video file",
         )
         # Call the parent class constructor
@@ -137,13 +138,10 @@ class GStreamerDetectionAppFile(GStreamerApp):
         )
         user_callback_pipeline = USER_CALLBACK_PIPELINE()
         
-        # Add tee element to split the stream for FPS display and file output
-        tee_pipeline = "tee name=t"
+        # Add overlay pipeline to draw bounding boxes and labels
+        overlay_pipeline = OVERLAY_PIPELINE()
         
-        # FPS display sink
-        fps_display_pipeline = "t. ! queue ! fpsdisplaysink name=hailo_display text-overlay=true sync=false"
-        
-        file_sink_pipeline = "t. ! " + FILE_SINK_PIPELINE(
+        file_sink_pipeline = FILE_SINK_PIPELINE(
             output_file=self.options_menu.output_file, bitrate=5000
         )
 
@@ -151,8 +149,7 @@ class GStreamerDetectionAppFile(GStreamerApp):
             f"{source_pipeline} ! "
             f"{detection_pipeline} ! "
             f"{user_callback_pipeline} ! "
-            f"{tee_pipeline} "
-            f"{fps_display_pipeline} "
+            f"{overlay_pipeline} ! "
             f"{file_sink_pipeline}"
         )
         print(pipeline_string)
@@ -163,7 +160,7 @@ def main():
     # Create an instance of the user app callback class
     user_data = app_callback_class()
     app_callback = dummy_callback
-    app = GStreamerDetectionApp(app_callback, user_data)
+    app = GStreamerDetectionAppFile(app_callback, user_data)
     app.run()
 
 
